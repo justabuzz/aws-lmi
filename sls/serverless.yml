@@ -1,0 +1,183 @@
+service: let-me-in
+
+custom:
+  SG_ID: '<<security group ID>>'
+  TOPIC_NAME: 'lmi-notifications'
+  EMAIL: '<<email address to receive notifications about added/removed SG rules>>'
+  TABLE_NAME: 'lmi-rule'
+  # USER_POOL_NAME: 'lmi-users'
+  USER_POOL_ARN: '<<plug here your pool ARN>>'
+  BUCKET_NAME: 'lmi-react-site'
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: ap-southeast-2
+  stage: dev
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action: 'SNS:Publish'
+      Resource:
+        Fn::Join:
+          - ':'
+          - - 'arn:aws:sns'
+            - Ref: 'AWS::Region'
+            - Ref: 'AWS::AccountId'
+            - ${self:custom.TOPIC_NAME}
+    - Effect: 'Allow'
+      Action: 'ec2:DescribeSecurityGroups'
+      Resource: '*'
+    - Effect: 'Allow'
+      Action:
+        - 'ec2:AuthorizeSecurityGroupIngress'
+        - 'ec2:RevokeSecurityGroupIngress'
+      Resource:
+        Fn::Join:
+          - ''
+          - - Fn::Join:
+              - ':'
+              - - 'arn:aws:ec2'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'security-group/'
+            - ${self:custom.SG_ID}
+    - Effect: 'Allow'
+      Action:
+        - 'dynamodb:GetRecords'
+        - 'dynamodb:GetShardIterator'
+        - 'dynamodb:DescribeStream'
+        - 'dynamodb:ListStreams'
+        - 'dynamodb:PutItem'
+      Resource:
+        Fn::Join:
+          - ''
+          - - Fn::Join:
+              - ':'
+              - - 'arn:aws:dynamodb'
+                - Ref: 'AWS::Region'
+                - Ref: 'AWS::AccountId'
+                - 'table/'
+            - ${self:custom.TABLE_NAME}
+
+package:
+  exclude:
+    - tests/**
+
+functions:
+  lmi_apighandler:
+    handler: apighandler.handler
+    environment:
+      SG_ID: ${self:custom.SG_ID}
+      TABLE_NAME: ${self:custom.TABLE_NAME}
+    events:
+      - http:
+          path: lmi
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: >
+                #set($inputRoot = $input.path('$'))
+                {
+                  "sourceIp": "$context.identity.sourceIp",
+                  "userId": "$context.authorizer.claims.email",
+                  "minutesToLive": $inputRoot.minutesToLive,
+                  "rule": {
+                    "ip": "$inputRoot.ip",
+                    "ports": [
+                #foreach($p in $inputRoot.ports)
+                      { "from": $p.from, "to": $p.to }#if($foreach.hasNext),#end
+                #end
+                    ]
+                  }
+                }
+          authorizer:
+            name: authorizer
+            arn: ${self:custom.USER_POOL_ARN}
+              # NOT SUPPORTED
+              # Fn::GetAtt:
+              #   - CognitoUserPool
+              #   - Arn
+            claims:
+              - email
+              - sub
+
+  lmi_ddbhandler:
+    handler: ddbhandler.handler
+    environment:
+      TOPIC_ARN:
+        Fn::Join:
+          - ':'
+          - - 'arn:aws:sns'
+            - Ref: 'AWS::Region'
+            - Ref: 'AWS::AccountId'
+            - ${self:custom.TOPIC_NAME}
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt:
+              - DdbRuleTable
+              - StreamArn
+          batchSize: 1
+
+resources:
+  Resources:
+    SnsTopic:
+      Type: "AWS::SNS::Topic"
+      Properties:
+        TopicName: ${self:custom.TOPIC_NAME}
+        Subscription:
+          - Endpoint: ${self:custom.EMAIL}
+            Protocol: email
+    DdbRuleTable:
+      Type: "AWS::DynamoDB::Table"
+      Properties:
+        TableName: ${self:custom.TABLE_NAME}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+    # COMMENTED OUT BECAUSE DUE TO SUPPORT LIMITATIONS I CREATED THE POOL BEFORE DEPLOYING THE PROJECT
+    # CognitoUserPool:
+    #   Type: "AWS::Cognito::UserPool"
+    #   Properties:
+    #     UserPoolName: ${self:custom.USER_POOL_NAME}
+    #     AdminCreateUserConfig:
+    #       AllowAdminCreateUserOnly: true
+    #     AutoVerifiedAttributes:
+    #       - email
+    # CognitoAppClient:
+    #   Type: "AWS::Cognito::UserPoolClient"
+    #   Properties:
+    #     ClientName: react
+    #     GenerateSecret: false
+    #     UserPoolId:
+    #       Ref: CognitoUserPool
+    S3BucketForStaticWebsite:
+        Type: "AWS::S3::Bucket"
+        Properties:
+          BucketName: ${self:custom.BUCKET_NAME}
+          AccessControl: PublicRead
+          WebsiteConfiguration:
+            IndexDocument: "index.html"
+            ErrorDocument: "error.html"
+  Outputs:
+    ReactAppBucketName:
+      Value:
+        Ref: S3BucketForStaticWebsite
+      Description: "Name of S3 bucket to host React web app"
+    ReactAppUrl:
+      Value:
+        Fn::GetAtt:
+          - S3BucketForStaticWebsite
+          - WebsiteURL
+      Description: "React web app URL"

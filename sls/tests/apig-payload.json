@@ -1,0 +1,8 @@
+{
+    "minutesToLive": 3,
+    "ip": "1.2.3.4",
+    "ports": [
+        { "from": 22, "to": 22 },
+        { "from": 80, "to": 80 }
+    ]
+}

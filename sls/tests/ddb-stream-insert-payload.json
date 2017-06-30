@@ -1,0 +1,68 @@
+{
+    "Records": [
+        {
+            "eventID": "fb89d2680c888cd4e654bb5cafd830ac",
+            "eventName": "INSERT",
+            "eventVersion": "1.1",
+            "eventSource": "aws:dynamodb",
+            "awsRegion": "ap-southeast-2",
+            "dynamodb": {
+                "ApproximateCreationDateTime": 1498458120,
+                "Keys": {
+                    "id": {
+                        "S": "4b4216ef-5164-454f-bf87-051eefe21a1a"
+                    }
+                },
+                "NewImage": {
+                    "sg_id": {
+                        "S": "sg-80dee8e7"
+                    },
+                    "user_id": {
+                        "S": "123"
+                    },
+                    "rule": {
+                        "M": {
+                            "ip": {
+                                "S": "1.2.3.4"
+                            },
+                            "ports": {
+                                "L": [
+                                    {
+                                        "M": {
+                                            "from": {
+                                                "N": "22"
+                                            },
+                                            "to": {
+                                                "N": "22"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "M": {
+                                            "from": {
+                                                "N": "80"
+                                            },
+                                            "to": {
+                                                "N": "80"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "expiry": {
+                        "N": "1498466363124"
+                    },
+                    "id": {
+                        "S": "4ffa35a3-e3ac-4647-b4ed-aced376d97df"
+                    }
+                },
+                "SequenceNumber": "3276600000000002561154966",
+                "SizeBytes": 174,
+                "StreamViewType": "NEW_AND_OLD_IMAGES"
+            },
+            "eventSourceARN": "arn:aws:dynamodb:ap-southeast-2:190027191216:table/lmi_rule/stream/2017-06-25T13:24:21.430"
+        }
+    ]
+}

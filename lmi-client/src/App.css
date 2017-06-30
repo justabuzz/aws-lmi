@@ -1,0 +1,85 @@
+.App {
+  text-align: center;
+  font-family: 'Palanquin', sans-serif;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  padding: 20px;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.hide {
+  display: none;
+}
+
+form {
+  padding: 10px;
+  background-color: #e5e5e5;
+  width: 400px;
+  margin: 0 auto;
+}
+
+form > div {
+  margin: 10px;
+}
+
+form > div > label {
+  display: inline-block;
+  width: 150px;
+  text-align: right;
+}
+
+form .ports-holder {
+  width: 175px;
+  display: inline-block;
+  text-align: left;
+  margin-left: 5px;
+}
+
+form .port {
+  width: 50px;
+}
+
+form .portTo {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+form .mins-to-live {
+  width: 50px;
+  margin-right: 120px;
+}
+
+.loading {
+  font-weight: bold;
+}
+
+.footer {
+  font-size: 13px;
+  margin: 20px 0 0 0;
+  line-height: 16px;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}
