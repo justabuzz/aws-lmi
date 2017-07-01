@@ -26,7 +26,7 @@ The majority of the deployment process is done by Serverless Framework. Steps fo
 
 ## To do
 
-1. Add list of current rules after login, so user can remove them via UI
-2. Include a remove link in the "LMI rule added" email
+- [ ] Add list of current rules after login, so user can remove them via UI
+- [ ] Include a remove link in the "LMI rule added" email
 
 That's it!
