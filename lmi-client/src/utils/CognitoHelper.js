@@ -1,7 +1,3 @@
-const COGNITO_REGION = 'ap-southeast-2';
-const COGNITO_USER_POOL_ID = '<<pool id>>';
-const COGNITO_USER_POOL_CLIENT_ID = '<<client id>>';
-
 const {
   CognitoUser,
   CognitoUserPool
@@ -10,11 +6,11 @@ const {
 export let cognitoUser = null;
 let cognitoIdJwtToken = null;
 
-window.AWSCognito.config.region = COGNITO_REGION;
+window.AWSCognito.config.region = window.COGNITO_REGION;
 
 const userPool = new CognitoUserPool({
-  UserPoolId: COGNITO_USER_POOL_ID,
-  ClientId: COGNITO_USER_POOL_CLIENT_ID
+  UserPoolId: window.COGNITO_USER_POOL_ID,
+  ClientId: window.COGNITO_USER_POOL_CLIENT_ID
 });
 
 // log user out
@@ -63,14 +59,14 @@ export function signin(username, password) {
             // password and required attributes, if any, to complete
             // authentication.
 
-            let newPassword = prompt('Choose new pwd:');
+            //for simplicity I will just pass the current password to get away from collecting new password
 
             // the api doesn't accept these fields back
             delete userAttributes.email_verified;
             delete userAttributes.phone_number_verified;
 
             // Get these details and call
-            cognitoUser.completeNewPasswordChallenge(newPassword, userAttributes, this);
+            cognitoUser.completeNewPasswordChallenge(password, userAttributes, this);
         }
     })
   })

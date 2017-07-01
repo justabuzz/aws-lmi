@@ -14,15 +14,18 @@ The majority of the deployment process is done by Serverless Framework. Steps fo
 3. Review serverless.yml parameters at the top and change values as needed. One important variable is the SG_ID - this is the security group ID which you will add/remove rules from. Also - set your email, as this will be the address that will receive messages about added and removed SG rules.
 3. Deploy the serverless project.
 4. Enable TTL on the lmi-rule DynamoDB table. Call the attribute 'expiry'. This needs to be done manually because CloudFormation doesn't yet support DynamoDB TTL.
-5. Update the API endpoint in lmi-client/src/App.js (line 76)
-6. Update Cognito User Pool details in lmi-client/src/utils/CognitoHelper.js
+5. Set the parameters in lmi-client/public/index.html
 6. Prepare the React app (execute `npm run build` inside lmi-client directory)
 7. Upload the React client to 'lmi-react-site' S3 bucket.
 
 ## Usage
 
-1. Browse to 'lmi-react-site' S3 bucket web URL.
+1. Browse to 'lmi-react-site' S3 bucket web URL (URL is emitted when sls deployment completes).
 2. Sign in using the credentials of the user you added to your Cognito User Pool.
 3. Add a rule and submit.
+
+## To do
+[] Add list of current rules after login, so user can remove them via UI
+[] Include a remove link in the "LMI rule added" email
 
 That's it!

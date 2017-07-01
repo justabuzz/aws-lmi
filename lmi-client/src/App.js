@@ -69,10 +69,10 @@ class App extends Component {
     this.setState({ success: false });
     this.setState({ error: false });
 
-    console.log(data);
-    console.log(getIdJwtToken());
+    //console.log(data);
+    //console.log(getIdJwtToken());
 
-    axios.post('https://jdyk7lk4ag.execute-api.ap-southeast-2.amazonaws.com/dev/lmi', data, {
+    axios.post(window.APIG_ENDPOINT + '/lmi', data, {
       headers: {
 				Authorization: getIdJwtToken()
 			}})
@@ -137,7 +137,7 @@ class App extends Component {
 
         <div className="footer">
           Developed by David Treves<br/>
-          <a href="https://www.onclouds.com.au/" target="_blank">https://www.onclouds.com.au/</a>
+          <a href="https://www.onclouds.com.au/" target="_blank" rel="noopener noreferrer">https://www.onclouds.com.au/</a>
         </div>
       </div>
     );

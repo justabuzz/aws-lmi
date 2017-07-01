@@ -21,6 +21,12 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
+    <script>
+      window.COGNITO_REGION = '<< AWS REGION >>';
+      window.COGNITO_USER_POOL_ID = '<< POOL ID >>';
+      window.COGNITO_USER_POOL_CLIENT_ID = '<< CLIENT ID >>';
+      window.APIG_ENDPOINT = '<< APIG ENDPOINT >>';
+    </script>
     <script src="%PUBLIC_URL%/lib/aws-cognito-sdk.min.js"></script>
     <script src="%PUBLIC_URL%/lib/amazon-cognito-identity.min.js"></script>
   </head>
