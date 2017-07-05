@@ -8,7 +8,7 @@ custom:
   MINS_TO_LIVE_CAP: 30 # hard limit on max time a rule is allowed to stay alive (value in minutes)
   # USER_POOL_NAME: 'lmi-users'
   USER_POOL_ARN: '<<plug here your pool ARN>>'
-  BUCKET_NAME: 'lmi-react-site'
+  BUCKET_NAME: '<<unique bucket name>>'
 
 provider:
   name: aws
@@ -148,6 +148,9 @@ resources:
           WriteCapacityUnits: 1
         StreamSpecification:
           StreamViewType: NEW_AND_OLD_IMAGES
+        TimeToLiveSpecification:
+          AttributeName: expiry
+          Enabled: true
     # COMMENTED OUT BECAUSE DUE TO SUPPORT LIMITATIONS I CREATED THE POOL BEFORE DEPLOYING THE PROJECT
     # CognitoUserPool:
     #   Type: "AWS::Cognito::UserPool"

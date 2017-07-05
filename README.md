@@ -15,10 +15,9 @@ The majority of the deployment process is done by Serverless Framework. Steps fo
 2. Plug the User Pool ARN in serverless.yml (variable USER_POOL_ARN).
 3. Review serverless.yml parameters at the top and change values as needed. One important variable is the SG_ID - this is the security group ID which you will add/remove rules from. Also - set your email, as this will be the address that will receive messages about added and removed SG rules.
 3. Deploy the serverless project.
-4. Enable TTL on the lmi-rule DynamoDB table. Call the attribute 'expiry'. This needs to be done manually because CloudFormation doesn't yet support DynamoDB TTL.
-5. Set the parameters in lmi-client/public/index.html (APIG endpoint is emitted when sls deploy completes as ServiceEndpoint output)
-6. Prepare the React app (execute `npm install` and `npm run build` inside lmi-client directory)
-7. Upload the React client (content of build directory) to 'lmi-react-site' S3 bucket and make sure it's marked as public.
+4. Set the parameters in lmi-client/public/index.html (APIG endpoint is emitted when sls deploy completes as ServiceEndpoint output)
+5. Prepare the React app (execute `npm install` and `npm run build` inside lmi-client directory)
+6. Upload the React client (content of build directory) to BUCKET_NAME S3 bucket and make sure it's marked as public.
 
 ## Usage
 
