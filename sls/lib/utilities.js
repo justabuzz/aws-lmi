@@ -9,12 +9,12 @@ exports.Utilities = function (ddbTblName, snsTopicName) {
     awsops.setAwsResourceNames(ddbTblName, snsTopicName);
 }
 
-exports.Utilities.prototype.addNewRule = function (userId, sgId, rule, minutesToLive) {
+exports.Utilities.prototype.addNewRule = function (userId, sgId, rule, minutesToLive, minsToLiveCap) {
     return new Promise(function (resolve, reject) {
         if (minutesToLive < 1)
             minutesToLive = 1;
-        else if (minutesToLive > 30)
-            minutesToLive = 30;
+        else if (minutesToLive > minsToLiveCap)
+            minutesToLive = minsToLiveCap;
         
         if (!validateIpAddress(rule.ip))
             reject('Invalid IP address');

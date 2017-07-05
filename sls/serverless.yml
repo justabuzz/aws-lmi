@@ -5,6 +5,7 @@ custom:
   TOPIC_NAME: 'lmi-notifications'
   EMAIL: '<<email address to receive notifications about added/removed SG rules>>'
   TABLE_NAME: 'lmi-rule'
+  MINS_TO_LIVE_CAP: 30 # hard limit on max time a rule is allowed to stay alive (value in minutes)
   # USER_POOL_NAME: 'lmi-users'
   USER_POOL_ARN: '<<plug here your pool ARN>>'
   BUCKET_NAME: 'lmi-react-site'
@@ -69,6 +70,7 @@ functions:
     environment:
       SG_ID: ${self:custom.SG_ID}
       TABLE_NAME: ${self:custom.TABLE_NAME}
+      MINS_TO_LIVE_CAP: ${self:custom.MINS_TO_LIVE_CAP}
     events:
       - http:
           path: lmi

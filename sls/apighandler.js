@@ -8,7 +8,7 @@ const utils = new Utilities(
 module.exports.handler = (event, context, callback) => {
   console.log('processing event: %j', event);
   
-  utils.addNewRule(event.userId, process.env.SG_ID, event.rule, event.minutesToLive).
+  utils.addNewRule(event.userId, process.env.SG_ID, event.rule, event.minutesToLive, process.env.MINS_TO_LIVE_CAP).
   then(function(result) {
     console.log(result);
     const response = {
