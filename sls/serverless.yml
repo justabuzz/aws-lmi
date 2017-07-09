@@ -1,10 +1,11 @@
 service: let-me-in
 
 custom:
-  SG_ID: '<<security group ID>>'
-  TOPIC_NAME: 'lmi-notifications'
-  EMAIL: '<<email address to receive notifications about added/removed SG rules>>'
-  TABLE_NAME: 'lmi-rule'
+  LMI_NAME: "<<name>>"
+  SG_ID: "<<security group ID>>"
+  TOPIC_NAME: "lmi-notifications"
+  EMAIL: "<<email address to receive notifications about added/removed SG rules>>"
+  TABLE_NAME: "lmi-rule"
   MINS_TO_LIVE_CAP: 30 # hard limit on max time a rule is allowed to stay alive (value in minutes)
   # USER_POOL_NAME: 'lmi-users'
   USER_POOL_ARN: '<<plug here your pool ARN>>'
@@ -44,11 +45,14 @@ provider:
             - ${self:custom.SG_ID}
     - Effect: 'Allow'
       Action:
+        - 'dynamodb:Scan'
+        - 'dynamodb:GetItem'
         - 'dynamodb:GetRecords'
         - 'dynamodb:GetShardIterator'
         - 'dynamodb:DescribeStream'
         - 'dynamodb:ListStreams'
         - 'dynamodb:PutItem'
+        - 'dynamodb:DeleteItem'
       Resource:
         Fn::Join:
           - ''
@@ -68,6 +72,7 @@ functions:
   lmi_apighandler:
     handler: apighandler.handler
     environment:
+      LMI_NAME: ${self:custom.LMI_NAME}
       SG_ID: ${self:custom.SG_ID}
       TABLE_NAME: ${self:custom.TABLE_NAME}
       MINS_TO_LIVE_CAP: ${self:custom.MINS_TO_LIVE_CAP}
@@ -104,10 +109,70 @@ functions:
             claims:
               - email
               - sub
+      - http:
+          path: lmi
+          method: get
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: >
+                {
+                  "sourceIp": "$context.identity.sourceIp",
+                  "userId": "$context.authorizer.claims.email",
+                  "action": "get-rules"
+                }
+          authorizer:
+            name: authorizer
+            arn: ${self:custom.USER_POOL_ARN}
+            claims:
+              - email
+              - sub
+      - http:
+          path: lmi
+          method: delete
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: >
+                {
+                  "sourceIp": "$context.identity.sourceIp",
+                  "userId": "$context.authorizer.claims.email",
+                  "action": "delete-rule",
+                  "ruleId": "$input.params('ruleId')"
+                }
+          authorizer:
+            name: authorizer
+            arn: ${self:custom.USER_POOL_ARN}
+            claims:
+              - email
+              - sub
+      - http:
+          path: updateIp
+          method: post
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: >
+                #set($inputRoot = $input.path('$'))
+                {
+                  "sourceIp": "$context.identity.sourceIp",
+                  "userId": "$context.authorizer.claims.email",
+                  "newIp": "$inputRoot.newIp"
+                }
+          authorizer:
+            name: authorizer
+            arn: ${self:custom.USER_POOL_ARN}
+            claims:
+              - email
+              - sub
 
   lmi_ddbhandler:
     handler: ddbhandler.handler
     environment:
+      LMI_NAME: ${self:custom.LMI_NAME}
       TOPIC_ARN:
         Fn::Join:
           - ':'
@@ -140,9 +205,13 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: user_id
+            AttributeType: S
         KeySchema:
           - AttributeName: id
             KeyType: HASH
+          - AttributeName: user_id
+            KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1

@@ -2,38 +2,57 @@
 
 const Utilities = require('./lib/utilities').Utilities;
 const utils = new Utilities(
+  process.env.LMI_NAME,
   process.env.IS_LOCAL ? 'lmi_rule' : process.env.TABLE_NAME,
-  process.env.IS_LOCAL ? 'arn:aws:sns:ap-southeast-2:190027191216:test' : process.env.TOPIC_ARN);
+  process.env.IS_LOCAL ? '<<TEST SNS TOPIC>>' : process.env.TOPIC_ARN,
+  process.env.MINS_TO_LIVE_CAP);
 
 module.exports.handler = (event, context, callback) => {
   console.log('processing event: %j', event);
-  
-  utils.addNewRule(event.userId, process.env.SG_ID, event.rule, event.minutesToLive, process.env.MINS_TO_LIVE_CAP).
-  then(function(result) {
-    console.log(result);
-    const response = {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: 'LMI worked',
-        result: result,
-      }),
-    };
 
-    callback(null, response);
-  })
-  .catch(function(error) {
-    console.log('error: %j', error);
+  let promise = undefined;
+  if (event.rule) {
+    promise = utils.addNewSgRule(event.userId, process.env.SG_ID, event.rule, event.minutesToLive);
+  } else if (event.newIp) {
+    promise = utils.updateSgRulesIp(event.userId, event.newIp);
+  } else if (event.action === 'get-rules') {
+    promise = utils.getCurrentRules(event.userId);
+  } else if (event.action === 'delete-rule') {
+    promise = utils.deleteRule(event.ruleId, event.userId);
+  }
+  
+  if (promise === undefined) {
     const response = {
-      statusCode: 500,
+      statusCode: 401,
       body: JSON.stringify({
-        message: 'LMI failed',
-        error: error,
+        error: 'Bad Request',
       }),
     };
 
     callback(response, null);
-  });
+  } else {
+    promise.
+    then(function(result) {
+      console.log(result);
+      const response = {
+        statusCode: 200,
+        body: JSON.stringify({
+          result: result,
+        }),
+      };
 
-  // Use this code if you don't use the http event with the LAMBDA-PROXY integration
-  // callback(null, { message: 'Go Serverless v1.0! Your function executed successfully!', event });
+      callback(null, response);
+    })
+    .catch(function(error) {
+      console.log('error: %j', error);
+      const response = {
+        statusCode: 500,
+        body: JSON.stringify({
+          error: error,
+        }),
+      };
+
+      callback(response, null);
+    });
+  }
 };

@@ -3,15 +3,8 @@
   font-family: 'Palanquin', sans-serif;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
 .App-header {
-  background-color: #222;
   padding: 20px;
-  color: white;
   margin-bottom: 10px;
 }
 
@@ -28,11 +21,32 @@
   display: none;
 }
 
-form {
+h2, h3{
+  margin: 0 0 5px 0;
+}
+
+div.box {
   padding: 10px;
   background-color: #e5e5e5;
   width: 400px;
-  margin: 0 auto;
+  margin: 10px auto;
+}
+
+div.logout {
+  text-align: right;
+  background-color: #fff;
+}
+
+div.auto-update {
+  text-align: left;
+}
+
+div.auto-update h3 {
+  text-align: center;
+}
+
+div.auto-update p {
+  margin: 3px 10px;
 }
 
 form > div {
@@ -64,6 +78,19 @@ form .portTo {
 form .mins-to-live {
   width: 50px;
   margin-right: 120px;
+}
+
+.rule-list table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.rule-list table, .rule-list th, .rule-list td {
+  border: 1px solid #fff;
+}
+.rule-list .btn-delete {
+  cursor: pointer;
+  color: blue;
+  text-decoration: underline;
 }
 
 .loading {

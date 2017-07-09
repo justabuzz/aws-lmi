@@ -9,39 +9,13 @@ const sns = new AWS.SNS();
 
 exports.AwsOps = function () { }
 
-// exports.AwsOps.prototype.ddbGetSettings = function (userId) {
-//     return new Promise(function (resolve, reject) {
-//         let params = {
-//             TableName: 'lmi_settings',
-//             Key: {
-//                 user_id: userId
-//             }
-//         };
-
-//         dynamodb.get(params).promise()
-//         .then(function(result) {
-//             if (result.Item === undefined) {
-//                 reject(Error('Settings not found'));
-//             } else {
-//                 resolve(result);
-//             }
-//         })
-//         .catch(function(error) {
-//             reject(Error(error));
-//         })
-//     })
-// }
-
 exports.AwsOps.prototype.setAwsResourceNames = function (ddbTableName, snsTopicArn) {
     this.ddbTableName = ddbTableName;
     this.snsTopicArn = snsTopicArn;
 }
 
-exports.AwsOps.prototype.ddbInsertRule = function (userId, sgId, rule, minutesToLive) {
+exports.AwsOps.prototype.ddbInsertRule = function (userId, sgId, rule, ttl) {
     return new Promise(function (resolve, reject) {
-        let date = new Date();
-        let ttl = Math.floor(date.setMinutes(date.getMinutes() + minutesToLive) / 1000);
-
         let params = {
             TableName: this.ddbTableName,
             Item: {
@@ -53,6 +27,8 @@ exports.AwsOps.prototype.ddbInsertRule = function (userId, sgId, rule, minutesTo
             }
         };
 
+        console.log('adding new rule: %j', params);
+
         dynamodb.put(params).promise()
         .then(function(result) {
             resolve(result);
@@ -62,6 +38,48 @@ exports.AwsOps.prototype.ddbInsertRule = function (userId, sgId, rule, minutesTo
             reject(error);
         });
     }.bind(this));
+}
+
+exports.AwsOps.prototype.ddbGetCurrentRules = function (userId) {
+    return new Promise(function (resolve, reject) {
+        let params = {
+            TableName: this.ddbTableName,
+            FilterExpression: 'user_id = :userId',
+            ExpressionAttributeValues: {
+                ':userId': userId
+            }
+        };
+
+        dynamodb.scan(params).promise()
+        .then(function(result) {
+            resolve(result);
+        }).catch(function(error) {
+            console.log('ddbGetCurrentRules error: %j', error);
+            reject(Error(error));
+        });
+    }.bind(this));
+}
+
+exports.AwsOps.prototype.ddbDeleteRule = function (ruleId, userId) {
+    return new Promise(function (resolve, reject) {
+        var params = {
+            TableName: this.ddbTableName,
+            Key: {
+                id: ruleId,
+                user_id: userId
+            }
+        };
+
+        console.log('delete params: %j', params);
+
+        dynamodb.delete(params).promise()
+        .then(function(result) {
+            resolve(result);
+        }).catch(function(error) {
+            console.log('ddbDeleteRule error: %j', error);
+            reject(Error(error));
+        })
+    }.bind(this))
 }
 
 exports.AwsOps.prototype.snsPublishMessage = function (userId, subject, message) {
@@ -91,7 +109,8 @@ exports.AwsOps.prototype.ec2AddIngressRules = function (sgId, rule) {
             resolve(data);
         })
         .catch(function(error) {
-            reject(Error(error));
+            console.log('Adding ingress SG rule failed. Not bubbling up the error. Details: %j', error);
+            //reject(Error(error));
         });
     }.bind(this));
 }

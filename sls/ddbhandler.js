@@ -2,8 +2,9 @@
 
 const Utilities = require('./lib/utilities').Utilities;
 const utils = new Utilities(
+  process.env.LMI_NAME,
   process.env.IS_LOCAL ? 'lmi_rule' : process.env.TABLE_NAME,
-  process.env.IS_LOCAL ? 'arn:aws:sns:ap-southeast-2:190027191216:test' : process.env.TOPIC_ARN);
+  process.env.IS_LOCAL ? '<<TEST SNS TOPIC>>' : process.env.TOPIC_ARN);
 
 module.exports.handler = (event, context, callback) => {
   console.log('Processing event: %j', event)
