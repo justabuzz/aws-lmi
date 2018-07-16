@@ -227,9 +227,9 @@ class App extends Component {
   }
 
   whatIsMyIp() {
-    return axios.get('//freegeoip.net/json/')
+    return axios.get('//checkip.amazonaws.com')
       .then(function (response) {
-        return response.data.ip;
+        return response;
       });
   }
 
