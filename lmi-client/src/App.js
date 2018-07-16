@@ -131,7 +131,6 @@ class App extends Component {
 				Authorization: getIdJwtToken()
 			}})
     .then(function (response) {
-      let body = JSON.parse(response.data.body);
       this.refreshCurrentRuleList();
       this.setState({ error: false, loading: false });
     }.bind(this))
@@ -296,7 +295,7 @@ class App extends Component {
                 this.state.currentRules.map(function(r, i) {
                   return <tr key={ i }>
                     <td>{ r.rule.ip }</td>
-                    <td>{ r.rule.ports.map(function(p, j) { return <span key={ j } className="ports">{ p.from + (p.from != p.to ? '-' + p.to : '') }</span> }) }</td>
+                    <td>{ r.rule.ports.map(function(p, j) { return <span key={ j } className="ports">{ p.from + (p.from !== p.to ? '-' + p.to : '') }</span> }) }</td>
                     <td>{ (new Date(r.expiry * 1000).toLocaleString()) }</td>
                     <td><span className="btn-delete" onClick={ (e) => { this.deleteRule(r.id); }}>Delete</span></td>
                   </tr>
