@@ -226,9 +226,9 @@ class App extends Component {
   }
 
   whatIsMyIp() {
-    return axios.get('//checkip.amazonaws.com')
+    return axios.get('//api.ipify.org?format=json')
       .then(function (response) {
-        return response;
+        return response.data.ip;
       });
   }
 
